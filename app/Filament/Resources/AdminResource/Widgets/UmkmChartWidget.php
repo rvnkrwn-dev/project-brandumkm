@@ -8,7 +8,7 @@ use Filament\Widgets\ChartWidget;
 
 class UmkmChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Progres UMKM Per Kota';
+    protected static ?string $heading = 'UMKM Progress by City';
     protected static ?int $sort = 3;
     protected int | string | array $columnSpan = 'full';
     protected static ?string $maxHeight = '400px';
@@ -65,17 +65,17 @@ class UmkmChartWidget extends ChartWidget
                     'backgroundColor' => '#3B82F6',
                 ],
                 [
-                    'label' => 'Proses Design',
+                    'label' => 'Design Process',
                     'data' => $proses_design,
                     'backgroundColor' => '#8B5CF6',
                 ],
                 [
-                    'label' => 'Siap Pasang',
+                    'label' => 'Ready to Install',
                     'data' => $siap_pasang,
                     'backgroundColor' => '#06B6D4',
                 ],
                 [
-                    'label' => 'Terbranding',
+                    'label' => 'Branded',
                     'data' => $terbranding,
                     'backgroundColor' => '#10B981',
                 ],
