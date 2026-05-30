@@ -27,9 +27,10 @@ class UmkmResource extends Resource
 {
     protected static ?string $model = Umkm::class;
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
-    protected static ?string $navigationGroup = 'Data UMKM';
+    protected static ?string $navigationGroup = 'UMKM Data';
+    protected static ?string $slug = 'umkm';
     protected static ?string $label = 'UMKM';
-    protected static ?string $pluralLabel = 'Data UMKM';
+    protected static ?string $pluralLabel = 'UMKM Data';
 
     // akses role design, client, admin
     public static function canAccess(): bool
@@ -55,9 +56,13 @@ class UmkmResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $user = auth()->user();
-        if (!$user || !in_array($user->role, ['client', 'admin'])) return null;
+        if (!$user || !in_array($user->role, ['client', 'admin', 'pic_lapangan'])) return null;
 
-        $count = Umkm::where('status', 'pending')->count();
+        $query = Umkm::where('status', 'pending');
+        if ($user->role === 'pic_lapangan' && $user->kota_id) {
+            $query->where('kota_id', $user->kota_id);
+        }
+        $count = $query->count();
         return $count > 0 ? (string) $count : null;
     }
 
@@ -88,7 +93,12 @@ public static function canEdit($record): bool
 public static function canDelete($record): bool
 {
     $user = auth()->user();
-    return in_array($user->role, ['admin', 'pic_lapangan']);
+    if (!$user) return false;
+    if ($user->role === 'admin') return true;
+    if ($user->role === 'pic_lapangan') {
+        return in_array($record->status, [Umkm::STATUS_PENDING, Umkm::STATUS_REJECTED]);
+    }
+    return false;
 }
 
     // Helper function untuk menghitung m2 dari W x H (cm)
@@ -508,7 +518,6 @@ public static function canDelete($record): bool
 Forms\Components\FileUpload::make('foto_depan')
     ->required()
     ->label('FOTO DEPAN')
-    ->disk('public')
     ->directory(fn (Forms\Get $get) => 'umkm/' . ($get('kota_id') ?: 'temp') . '/foto')
     ->image()
     ->imageResizeMode('cover')
@@ -516,7 +525,6 @@ Forms\Components\FileUpload::make('foto_depan')
     ->imageResizeTargetHeight('1200')
     ->imageResizeUpscale(false)
     ->maxSize(5120)
-    ->visibility('public')
     ->imagePreviewHeight('200')
     ->loadingIndicatorPosition('left')
     ->panelAspectRatio('2:1')
@@ -531,7 +539,6 @@ Forms\Components\FileUpload::make('foto_depan')
 Forms\Components\FileUpload::make('foto_kanan')
     ->required()
     ->label('FOTO KANAN')
-    ->disk('public')
     ->directory(fn (Forms\Get $get) => 'umkm/' . ($get('kota_id') ?: 'temp') . '/foto')
     ->image()
     ->imageResizeMode('cover')
@@ -539,7 +546,6 @@ Forms\Components\FileUpload::make('foto_kanan')
     ->imageResizeTargetHeight('1200')
     ->imageResizeUpscale(false)
     ->maxSize(5120)
-    ->visibility('public')
     ->imagePreviewHeight('200')
     ->loadingIndicatorPosition('left')
     ->panelAspectRatio('2:1')
@@ -554,7 +560,6 @@ Forms\Components\FileUpload::make('foto_kanan')
 Forms\Components\FileUpload::make('foto_kiri')
     ->required()
     ->label('FOTO KIRI')
-    ->disk('public')
     ->directory(fn (Forms\Get $get) => 'umkm/' . ($get('kota_id') ?: 'temp') . '/foto')
     ->image()
     ->imageResizeMode('cover')
@@ -562,7 +567,6 @@ Forms\Components\FileUpload::make('foto_kiri')
     ->imageResizeTargetHeight('1200')
     ->imageResizeUpscale(false)
     ->maxSize(5120)
-    ->visibility('public')
     ->imagePreviewHeight('200')
     ->loadingIndicatorPosition('left')
     ->panelAspectRatio('2:1')
@@ -577,7 +581,6 @@ Forms\Components\FileUpload::make('foto_kiri')
 Forms\Components\FileUpload::make('foto_plang_alfamart')
     ->required()
     ->label('FOTO WIDE JARAK JAUH (PLANG ALFAMART)')
-    ->disk('public')
     ->directory(fn (Forms\Get $get) => 'umkm/' . ($get('kota_id') ?: 'temp') . '/foto')
     ->image()
     ->imageResizeMode('cover')
@@ -585,7 +588,6 @@ Forms\Components\FileUpload::make('foto_plang_alfamart')
     ->imageResizeTargetHeight('1200')
     ->imageResizeUpscale(false)
     ->maxSize(5120)
-    ->visibility('public')
     ->imagePreviewHeight('200')
     ->loadingIndicatorPosition('left')
     ->panelAspectRatio('2:1')
@@ -600,7 +602,6 @@ Forms\Components\FileUpload::make('foto_plang_alfamart')
 Forms\Components\FileUpload::make('foto_tampak_jauh')
     ->required()
     ->label('FOTO TAMPAK JAUH (KESELURUHAN AREA)')
-    ->disk('public')
     ->directory(fn (Forms\Get $get) => 'umkm/' . ($get('kota_id') ?: 'temp') . '/foto')
     ->image()
     ->imageResizeMode('cover')
@@ -608,7 +609,6 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
     ->imageResizeTargetHeight('1200')
     ->imageResizeUpscale(false)
     ->maxSize(5120)
-    ->visibility('public')
     ->imagePreviewHeight('200')
     ->loadingIndicatorPosition('left')
     ->panelAspectRatio('2:1')
@@ -631,9 +631,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
                 Forms\Components\FileUpload::make('video_validasi')
                   ->label('UPLOAD VIDEO (MP4) max 2 menit / 50MB — Wajib jika Alfamart tidak terlihat di foto')
                      ->maxSize(51200) // 50MB
-                    ->disk('public')
                     ->directory(fn (Forms\Get $get) => 'umkm/' . ($get('kota_id') ?: 'temp') . '/video')
-                    ->visibility('public')
                     ->acceptedFileTypes(['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/3gpp', 'video/3gpp2'])
                     ->helperText('Rekam dari lokasi gerobak sampai terlihat Alfamart. Max 2 menit. Format: MP4, MOV, AVI, 3GP.')
                     ->placeholder('Klik untuk rekam video')
@@ -771,7 +769,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
 
     // Tampilkan alasan reject jika statusnya rejected
 \Filament\Infolists\Components\TextEntry::make('alasan_reject')
-    ->label('Alasan Penolakan (Reject)')
+    ->label('Rejection Reason')
     ->placeholder('Tidak ada alasan tertulis.')
     ->color('danger')
     ->weight('bold')
@@ -795,7 +793,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
     ->visible(fn ($record) => $record?->status === 'rejected'),
 
         // DATA PEMILIK
-        \Filament\Infolists\Components\Section::make('Data Pemilik')
+        \Filament\Infolists\Components\Section::make('Owner Data')
             ->schema([
                 \Filament\Infolists\Components\TextEntry::make('nama_pemilik')
                     ->label('Nama Pemilik'),
@@ -829,7 +827,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
             ->columns(2),
 
         // REKENING
-        \Filament\Infolists\Components\Section::make('Data Rekening')
+        \Filament\Infolists\Components\Section::make('Bank Account')
             ->schema([
                 \Filament\Infolists\Components\TextEntry::make('no_rekening')
                     ->label('No Rekening'),
@@ -843,7 +841,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
             ->columns(3),
 
         // LOKASI
-        \Filament\Infolists\Components\Section::make('Lokasi')
+        \Filament\Infolists\Components\Section::make('Location')
             ->schema([
 
                 \Filament\Infolists\Components\TextEntry::make('latitude')
@@ -900,11 +898,19 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
             ]),
 
         \Filament\Infolists\Components\ImageEntry::make('foto_plang_alfamart')
-            ->label('Foto jarak dekat plang Alfamart')
+            ->label('Foto Plang Alfamart')
             ->height(200)
             ->extraAttributes(fn ($record) => [
                 'class' => 'cursor-pointer hover:scale-105 transition duration-300',
                 'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->foto_plang_alfamart) . '" })',
+            ]),
+
+        \Filament\Infolists\Components\ImageEntry::make('foto_tampak_jauh')
+            ->label('Foto Tampak Jauh')
+            ->height(200)
+            ->extraAttributes(fn ($record) => [
+                'class' => 'cursor-pointer hover:scale-105 transition duration-300',
+                'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->foto_tampak_jauh) . '" })',
             ]),
 
         // Video Entry menggunakan ViewEntry murni tanpa modal
@@ -981,7 +987,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
                     'approved_at' => now(),
                     'approved_by' => auth()->id(),
                 ]);
-                \Filament\Notifications\Notification::make()->title('UMKM Disetujui ✅')->success()->send();
+                \Filament\Notifications\Notification::make()->title('UMKM Approved ✅')->success()->send();
             }),
         Tables\Actions\Action::make('reject_from_view')
             ->label('Reject UMKM')
@@ -990,7 +996,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
             ->visible(fn (Umkm $record) => $record->status === 'pending' && auth()->user()->isClient())
             ->form([
                 Forms\Components\Textarea::make('alasan_reject')
-                    ->label('Alasan Reject')
+                    ->label('Rejection Reason')
                     ->required(),
             ])
             ->action(function (Umkm $record, array $data) {
@@ -998,7 +1004,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
                     'status' => 'rejected',
                     'alasan_reject' => $data['alasan_reject'],
                 ]);
-                \Filament\Notifications\Notification::make()->title('UMKM Ditolak ❌')->danger()->send();
+                \Filament\Notifications\Notification::make()->title('UMKM Rejected ❌')->danger()->send();
             }),
     ]),
               Tables\Actions\EditAction::make()
@@ -1027,7 +1033,7 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
                     ->color('danger')
                     ->form([
                         Forms\Components\Textarea::make('alasan_reject')
-                            ->label('Alasan Reject')
+                            ->label('Rejection Reason')
                             ->required(),
                     ])
                     ->visible(fn (Umkm $record) => 
@@ -1044,7 +1050,17 @@ Forms\Components\FileUpload::make('foto_tampak_jauh')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                   Tables\Actions\DeleteBulkAction::make()
-    ->visible(fn () => in_array(auth()->user()?->role, ['admin', 'pic_lapangan'])),
+    ->visible(fn () => in_array(auth()->user()?->role, ['admin', 'pic_lapangan']))
+    ->before(function ($records) {
+        $user = auth()->user();
+        if ($user?->role === 'pic_lapangan') {
+            $records->each(function ($record) {
+                if (!in_array($record->status, [Umkm::STATUS_PENDING, Umkm::STATUS_REJECTED])) {
+                    throw new \Exception('Tidak bisa menghapus UMKM yang sudah diproses.');
+                }
+            });
+        }
+    }),
                 ]),
             ])
             ->headerActions([
