@@ -84,7 +84,7 @@
             };
         }
      }" x-on:open-preview-modal.window="isOpen = true; checkMedia($event.detail.src)"
-    x-on:keydown.escape.window="isOpen = false" class="relative z-50" x-cloak>
+    x-on:keydown.escape.window="isOpen = false" class="relative z-50" :class="{ 'pointer-events-none': !isOpen }" x-cloak>
 
     <!-- Overlay Gelap -->
     <div class="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity" x-show="isOpen" x-transition.opacity
