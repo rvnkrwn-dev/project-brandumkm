@@ -17,10 +17,10 @@ class UmkmDesignResource extends Resource
 {
     protected static ?string $model = UmkmDesign::class;
     protected static ?string $navigationIcon = 'heroicon-o-paint-brush';
-    protected static ?string $navigationGroup = 'Data UMKM';
-    protected static ?string $label = 'History UMKM';
-    protected static ?string $pluralLabel = 'History UMKM';
-    protected static ?string $navigationLabel = 'History UMKM';
+    protected static ?string $navigationGroup = 'UMKM Data';
+    protected static ?string $label = 'Design History';
+    protected static ?string $pluralLabel = 'Design History';
+    protected static ?string $navigationLabel = 'Design History';
 
     public static function canAccess(): bool
     {
@@ -162,7 +162,7 @@ class UmkmDesignResource extends Resource
                             ->required(),
 
                         Forms\Components\TextInput::make('nama_desainer')
-                            ->label('Nama Desainer')
+                            ->label('Designer Name')
                             ->placeholder('Nama desainer untuk identifikasi client')
                             ->required()
                             ->columnSpanFull(),
@@ -281,7 +281,7 @@ class UmkmDesignResource extends Resource
                     ->successNotificationTitle('Design berhasil direvisi & dikirim ke client untuk review ulang'),
 
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn () => auth()->user()?->isDesign()),
+                    ->visible(fn ($record) => auth()->user()?->isDesign() && in_array($record->status, ['pending', 'revision_needed'])),
 
                 Tables\Actions\Action::make('approve')
                     ->label('Approve')
@@ -309,7 +309,7 @@ class UmkmDesignResource extends Resource
                     ->color('warning')
                     ->form([
                         Forms\Components\Textarea::make('catatan_revisi')
-                            ->label('Catatan Revisi')
+                            ->label('Revision Notes')
                             ->required(),
                     ])
                     ->visible(fn (UmkmDesign $record) =>
@@ -360,7 +360,7 @@ class UmkmDesignResource extends Resource
                                 default => 'gray',
                             }),
                         \Filament\Infolists\Components\TextEntry::make('catatan_revisi')
-                            ->label('Catatan Revisi')
+                            ->label('Revision Notes')
                             ->columnSpanFull()
                             ->visible(fn ($record) => !empty($record->catatan_revisi)),
                     ])->columns(3),
@@ -370,34 +370,30 @@ class UmkmDesignResource extends Resource
                         \Filament\Infolists\Components\ImageEntry::make('file_path')
                             ->label('File Design Final')
                             ->height(200)
-                            ->getStateUsing(fn ($record) => asset('storage/' . $record->file_path))
                             ->extraAttributes(fn ($record) => [
                                 'class' => 'cursor-pointer hover:scale-105 transition duration-300 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700',
                                 'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->file_path) . '" })',
                             ]),
 
                         \Filament\Infolists\Components\ImageEntry::make('gerobak_depan')
-                            ->label('Mockup Gerobak Depan')
+                            ->label('Cart Mockup Front')
                             ->height(200)
-                            ->getStateUsing(fn ($record) => asset('storage/' . $record->gerobak_depan))
                             ->extraAttributes(fn ($record) => [
                                 'class' => 'cursor-pointer hover:scale-105 transition duration-300 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700',
                                 'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->gerobak_depan) . '" })',
                             ]),
 
                         \Filament\Infolists\Components\ImageEntry::make('gerobak_kiri')
-                            ->label('Mockup Gerobak Kiri')
+                            ->label('Cart Mockup Left')
                             ->height(200)
-                            ->getStateUsing(fn ($record) => asset('storage/' . $record->gerobak_kiri))
                             ->extraAttributes(fn ($record) => [
                                 'class' => 'cursor-pointer hover:scale-105 transition duration-300 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700',
                                 'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->gerobak_kiri) . '" })',
                             ]),
 
                         \Filament\Infolists\Components\ImageEntry::make('gerobak_kanan')
-                            ->label('Mockup Gerobak Kanan')
+                            ->label('Cart Mockup Right')
                             ->height(200)
-                            ->getStateUsing(fn ($record) => asset('storage/' . $record->gerobak_kanan))
                             ->extraAttributes(fn ($record) => [
                                 'class' => 'cursor-pointer hover:scale-105 transition duration-300 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700',
                                 'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->gerobak_kanan) . '" })',

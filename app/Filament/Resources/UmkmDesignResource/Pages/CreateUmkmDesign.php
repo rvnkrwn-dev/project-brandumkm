@@ -39,8 +39,8 @@ class CreateUmkmDesign extends CreateRecord
 
             if ($existing) {
                 Notification::make()
-                    ->title('UMKM ini sudah punya design yang perlu direvisi')
-                    ->body('Silakan edit design yang sudah ada.')
+                    ->title('This UMKM already has a design that needs revision')
+                    ->body('Please edit the existing design.')
                     ->warning()
                     ->persistent()
                     ->send();
