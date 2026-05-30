@@ -22,7 +22,7 @@ class UmkmPerluDesignTableWidget extends BaseWidget
     {
         return new \Illuminate\Support\HtmlString('
             <div id="tabel-antrean-design" style="scroll-margin-top: 20px;">
-                Daftar Antrean UMKM Perlu di-Design
+                UMKM Design Queue
             </div>
         ');
     }
@@ -47,7 +47,7 @@ class UmkmPerluDesignTableWidget extends BaseWidget
         )
         ->columns([
             Tables\Columns\TextColumn::make('nama_usaha')
-                ->label('Nama UMKM')
+                ->label('UMKM Name')
                 ->searchable()
                 ->sortable(),
 
@@ -64,9 +64,9 @@ class UmkmPerluDesignTableWidget extends BaseWidget
         default           => 'gray',
     })
     ->formatStateUsing(fn (string $state): string => match ($state) {
-        'revision_needed' => 'Perlu Revisi',
-        'pending'         => 'Menunggu Review',
-        'waiting'         => 'Menunggu di-design',
+        'revision_needed' => 'Needs Revision',
+        'pending'         => 'Awaiting Review',
+        'waiting'         => 'Awaiting Design',
         default           => ucfirst($state),
     }),
 
@@ -76,17 +76,17 @@ class UmkmPerluDesignTableWidget extends BaseWidget
                 ->sortable(),
             
             Tables\Columns\TextColumn::make('nama_pemilik')
-                ->label('Pemilik')
+                ->label('Owner')
                 ->searchable(),
             
             Tables\Columns\TextColumn::make('created_at')
-                ->label('Tanggal Masuk')
+                ->label('Submission Date')
                 ->dateTime('d M Y H:i')
                 ->sortable(),
         ])
         ->filters( [
             Tables\Filters\SelectFilter::make('kota_id')
-                ->label( 'Filter Kota' )
+                ->label( 'Filter by City' )
                 ->options( Kota::pluck( 'nama', 'id' ) )    
                 ->searchable(),
         ] )
@@ -94,7 +94,7 @@ class UmkmPerluDesignTableWidget extends BaseWidget
         ->actions( [
             Tables\Actions\Action::make('proses_design')
     ->label(fn (Umkm $record): string => 
-        ($record->umkmDesign?->status === 'revision_needed') ? 'Revisi Sekarang' : 'Design Sekarang'
+        ($record->umkmDesign?->status === 'revision_needed') ? 'Revise Now' : 'Design Now'
     )
     ->icon(fn (Umkm $record): string => 
         ($record->umkmDesign?->status === 'revision_needed') ? 'heroicon-m-arrow-path' : 'heroicon-m-paint-brush'
@@ -110,6 +110,7 @@ class UmkmPerluDesignTableWidget extends BaseWidget
             : '/admin/umkm-designs/create?umkm=' . $record->id
     ),
             Tables\Actions\ViewAction::make()
+            ->label('View Details')
             ->slideOver()
             ->modalWidth( 'screen' )
             ->modalHeading( fn ( $record ) => $record->nama_usaha )
@@ -215,7 +216,6 @@ class UmkmPerluDesignTableWidget extends BaseWidget
                     \Filament\Infolists\Components\ImageEntry::make( 'foto_depan' )
                     ->label( 'Foto Depan' )
                     ->height( 200 )
-                       ->getStateUsing(fn ($record) => asset('storage/' . $record->foto_depan))
                     ->extraAttributes(fn ($record) => [
                         'class' => 'cursor-pointer hover:scale-105 transition duration-300 rounded-lg overflow-hidden',
                         'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->foto_depan) . '" })',
@@ -224,7 +224,6 @@ class UmkmPerluDesignTableWidget extends BaseWidget
                     \Filament\Infolists\Components\ImageEntry::make( 'foto_kanan' )
                     ->label( 'Foto Kanan' )
                     ->height( 200 )
-                       ->getStateUsing(fn ($record) => asset('storage/' . $record->foto_kanan))
                     ->extraAttributes(fn ($record) => [
                         'class' => 'cursor-pointer hover:scale-105 transition duration-300 rounded-lg overflow-hidden',
                         'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->foto_kanan) . '" })',
@@ -233,7 +232,6 @@ class UmkmPerluDesignTableWidget extends BaseWidget
                     \Filament\Infolists\Components\ImageEntry::make( 'foto_kiri' )
                     ->label( 'Foto Kiri' )
                     ->height( 200 )
-                       ->getStateUsing(fn ($record) => asset('storage/' . $record->foto_kiri))
                     ->extraAttributes(fn ($record) => [
                         'class' => 'cursor-pointer hover:scale-105 transition duration-300 rounded-lg overflow-hidden',
                         'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->foto_kiri) . '" })',
@@ -241,10 +239,9 @@ class UmkmPerluDesignTableWidget extends BaseWidget
                     \Filament\Infolists\Components\ImageEntry::make( 'foto_plang_alfamart' )
                     ->label( 'Foto Plang Alfamart' )
                     ->height( 200 )
-                       ->getStateUsing(fn ($record) => asset('storage/' . $record->foto_plang_alfamart))
                     ->extraAttributes(fn ($record) => [
                         'class' => 'cursor-pointer hover:scale-105 transition duration-300 rounded-lg overflow-hidden',
-                        'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->foto_kiri) . '" })',
+                        'x-on:click' => '$dispatch("open-preview-modal", { src: "' . asset('storage/' . $record->foto_plang_alfamart) . '" })',
                     ]),
                 ] )
                 ->columns( 3 ),
@@ -348,7 +345,7 @@ class UmkmPerluDesignTableWidget extends BaseWidget
                     ->schema([
                         \Filament\Infolists\Components\Actions::make([
                             \Filament\Infolists\Components\Actions\Action::make('design_sekarang')
-                                ->label(fn (Umkm $record) => $record->umkmDesign?->status === 'revision_needed' ? 'Revisi Sekarang' : 'Design Sekarang')
+                                ->label(fn (Umkm $record) => $record->umkmDesign?->status === 'revision_needed' ? 'Revise Now' : 'Design Now')
                                 ->icon('heroicon-o-paint-brush')
                                 ->color('warning')
                                 ->url(fn (Umkm $record) => $record->umkmDesign?->status === 'revision_needed'
@@ -360,8 +357,8 @@ class UmkmPerluDesignTableWidget extends BaseWidget
             ] ),
         ] )
 
-        // supaya klik row buka popup
-        ->recordAction( 'view' )
+        // klik row buka popup
+        ->recordAction('view')
         ->paginated(10)
         ->striped();
     }
