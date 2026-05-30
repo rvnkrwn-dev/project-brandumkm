@@ -97,7 +97,7 @@
         font-weight: 700;
     }
 
-    /* Baris pembatas antar kelompok Tampak Depan/Kanan/Kiri */
+    /* Baris pembatas antar kelompok Front Side/Kanan/Kiri */
     .group-divider {
         border-top: 2px solid #4a5568 !important;
     }
@@ -131,59 +131,59 @@
             <tr>
                 <th>BRAND. AREA</th>
                 <th>PANEL</th>
-                <th class="text-center">L (CM)</th>
-                <th class="text-center">T (CM)</th>
+                <th class="text-center">W (CM)</th>
+                <th class="text-center">H (CM)</th>
                 <th class="text-right">M2</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td class="brand-area-cell" rowspan="3">Tampak Depan</td>
-                <td>Atas</td>
+                <td class="brand-area-cell" rowspan="3">Front Side</td>
+                <td>Top</td>
                 <td class="text-center">{{ $depanAtas['l'] }}</td>
                 <td class="text-center">{{ $depanAtas['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->depan_panel_atas_m2 ?? 0, 2) }}</td> </tr>
             <tr>
-                <td>Tengah</td>
+                <td>Middle</td>
                 <td class="text-center">{{ $depanTengah['l'] }}</td>
                 <td class="text-center">{{ $depanTengah['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->depan_panel_tengah_m2 ?? 0, 2) }}</td> </tr>
             <tr>
-                <td>Bawah</td>
+                <td>Bottom</td>
                 <td class="text-center">{{ $depanBawah['l'] }}</td>
                 <td class="text-center">{{ $depanBawah['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->depan_panel_bawah_m2 ?? 0, 2) }}</td> </tr>
 
             <tr class="group-divider">
-                <td class="brand-area-cell" rowspan="3">Sisi Kanan</td>
-                <td>Atas</td>
+                <td class="brand-area-cell" rowspan="3">Right Side</td>
+                <td>Top</td>
                 <td class="text-center">{{ $kananAtas['l'] }}</td>
                 <td class="text-center">{{ $kananAtas['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->kanan_panel_atas_m2 ?? 0, 2) }}</td> </tr>
             <tr>
-                <td>Tengah</td>
+                <td>Middle</td>
                 <td class="text-center">{{ $kananTengah['l'] }}</td>
                 <td class="text-center">{{ $kananTengah['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->kanan_panel_tengah_m2 ?? 0, 2) }}</td> </tr>
             <tr>
-                <td>Bawah</td>
+                <td>Bottom</td>
                 <td class="text-center">{{ $kananBawah['l'] }}</td>
                 <td class="text-center">{{ $kananBawah['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->kanan_panel_bawah_m2 ?? 0, 2) }}</td> </tr>
 
             <tr class="group-divider">
-                <td class="brand-area-cell" rowspan="3">Sisi Kiri</td>
-                <td>Atas</td>
+                <td class="brand-area-cell" rowspan="3">Left Side</td>
+                <td>Top</td>
                 <td class="text-center">{{ $kiriAtas['l'] }}</td>
                 <td class="text-center">{{ $kiriAtas['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->kiri_panel_atas_m2 ?? 0, 2) }}</td> </tr>
             <tr>
-                <td>Tengah</td>
+                <td>Middle</td>
                 <td class="text-center">{{ $kiriTengah['l'] }}</td>
                 <td class="text-center">{{ $kiriTengah['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->kiri_panel_tengah_m2 ?? 0, 2) }}</td> </tr>
             <tr>
-                <td>Bawah</td>
+                <td>Bottom</td>
                 <td class="text-center">{{ $kiriBawah['l'] }}</td>
                 <td class="text-center">{{ $kiriBawah['t'] }}</td>
                 <td class="text-right font-bold" style="color: #fff;">{{ number_format($record->kiri_panel_bawah_m2 ?? 0, 2) }}</td> </tr>
