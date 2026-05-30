@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 class UmkmStikerResource extends Resource
 {
     protected static ?string $model = Umkm::class;
-    protected static ?string $navigationLabel = 'Pemasangan Stiker';
+    protected static ?string $navigationLabel = 'Sticker Installation';
     protected static ?string $slug = 'pemasangan-stiker';
     protected static ?string $navigationIcon = 'heroicon-o-photo';
 
@@ -41,7 +41,7 @@ class UmkmStikerResource extends Resource
                             ->required(),
 
                         Forms\Components\Select::make('kota_id')
-                            ->label('Nama Kota')
+                            ->label('Kota')
                             ->options(Kota::orderBy('nama')->pluck('nama', 'id'))
                             ->searchable()
                             ->preload()
@@ -54,7 +54,7 @@ class UmkmStikerResource extends Resource
                             ->disabled(),
 
                         Forms\Components\TextInput::make('nama_team_pasang')
-                            ->label('Nama Team Pasang')
+                            ->label('Nama Tim Pasang')
                             ->default(fn () => auth()->user()?->name)
                             ->required(),
                     ])->columns(2),
@@ -125,8 +125,12 @@ class UmkmStikerResource extends Resource
                     ->latest();
 
                 // Filter berdasarkan kota akun team_pasang
-                if ($user && $user->role === 'team_pasang' && $user->kota_id) {
-                    $query->where('kota_id', $user->kota_id);
+                if ($user && $user->role === 'team_pasang') {
+                    if ($user->kota_id) {
+                        $query->where('kota_id', $user->kota_id);
+                    } else {
+                        $query->whereRaw('0 = 1'); // no kota assigned = no records
+                    }
                 }
             })
             ->columns([
