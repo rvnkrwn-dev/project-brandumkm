@@ -26,13 +26,13 @@ class NotifikasiService
 
     public static function notifyNewUmkm(Umkm $umkm): void
     {
-        $pesan = "UMKM baru: {$umkm->nama_usaha} dari {$umkm->kota->nama} perlu direview.";
+        $pesan = "New UMKM: {$umkm->nama_usaha} from {$umkm->kota->nama} needs review.";
 
         $clients = User::where('role', 'client')->get();
         foreach ($clients as $client) {
             Notifikasi::create([
                 'user_id' => $client->id,
-                'judul' => 'UMKM Baru Masuk',
+                'judul' => 'New UMKM Submission',
                 'pesan' => $pesan,
                 'tipe' => 'umkm_baru',
                 'notifiable_type' => Umkm::class,
@@ -40,7 +40,7 @@ class NotifikasiService
             ]);
         }
 
-        self::notifyAdmin('UMKM Baru Masuk', $pesan, 'umkm_baru', Umkm::class, $umkm->id);
+        self::notifyAdmin('New UMKM Submission', $pesan, 'umkm_baru', Umkm::class, $umkm->id);
     }
 
     public static function notifyUmkmApproved(Umkm $umkm): void
@@ -49,8 +49,8 @@ class NotifikasiService
         foreach ($designers as $designer) {
             Notifikasi::create([
                 'user_id' => $designer->id,
-                'judul' => 'UMKM Perlu Design',
-                'pesan' => "UMKM: {$umkm->nama_usaha} sudah diapprove dan perlu dibuatkan design.",
+                'judul' => 'UMKM Needs Design',
+                'pesan' => "UMKM: {$umkm->nama_usaha} has been approved and needs a design.",
                 'tipe' => 'perlu_design',
                 'notifiable_type' => Umkm::class,
                 'notifiable_id' => $umkm->id,
@@ -59,39 +59,39 @@ class NotifikasiService
 
         Notifikasi::create([
             'user_id' => $umkm->submitted_by,
-            'judul' => 'UMKM Anda Disetujui ✅',
+            'judul' => 'UMKM Disetujui ✅',
             'pesan' => "UMKM {$umkm->nama_usaha} telah disetujui oleh client.",
             'tipe' => 'umkm_approved',
             'notifiable_type' => Umkm::class,
             'notifiable_id' => $umkm->id,
         ]);
 
-        self::notifyAdmin('UMKM Disetujui', "UMKM {$umkm->nama_usaha} disetujui client.", 'umkm_approved', Umkm::class, $umkm->id);
+        self::notifyAdmin('UMKM Approved', "UMKM {$umkm->nama_usaha} approved by client.", 'umkm_approved', Umkm::class, $umkm->id);
     }
 
     public static function notifyUmkmRejected(Umkm $umkm): void
     {
         Notifikasi::create([
             'user_id' => $umkm->submitted_by,
-            'judul' => 'UMKM Anda Ditolak ❌',
+            'judul' => 'UMKM Ditolak ❌',
             'pesan' => "UMKM {$umkm->nama_usaha} ditolak. Alasan: {$umkm->alasan_reject}",
             'tipe' => 'umkm_rejected',
             'notifiable_type' => Umkm::class,
             'notifiable_id' => $umkm->id,
         ]);
 
-        self::notifyAdmin('UMKM Ditolak', "UMKM {$umkm->nama_usaha} ditolak. Alasan: {$umkm->alasan_reject}", 'umkm_rejected', Umkm::class, $umkm->id);
+        self::notifyAdmin('UMKM Rejected', "UMKM {$umkm->nama_usaha} rejected. Reason: {$umkm->alasan_reject}", 'umkm_rejected', Umkm::class, $umkm->id);
     }
 
     public static function notifyNewDesign(UmkmDesign $design): void
     {
-        $pesan = "Design baru untuk {$design->umkm->nama_usaha} perlu direview.";
+        $pesan = "New design for {$design->umkm->nama_usaha} needs review.";
 
         $clients = User::where('role', 'client')->get();
         foreach ($clients as $client) {
             Notifikasi::create([
                 'user_id' => $client->id,
-                'judul' => 'Design Baru Upload',
+                'judul' => 'New Design Uploaded',
                 'pesan' => $pesan,
                 'tipe' => 'design_baru',
                 'notifiable_type' => UmkmDesign::class,
@@ -99,32 +99,32 @@ class NotifikasiService
             ]);
         }
 
-        self::notifyAdmin('Design Baru Upload', $pesan, 'design_baru', UmkmDesign::class, $design->id);
+        self::notifyAdmin('New Design Uploaded', $pesan, 'design_baru', UmkmDesign::class, $design->id);
     }
 
     public static function notifyDesignRevision(UmkmDesign $design): void
     {
         Notifikasi::create([
             'user_id' => $design->designer_id,
-            'judul' => 'Design Perlu Revisi',
-            'pesan' => "Design untuk {$design->umkm->nama_usaha} perlu direvisi. Catatan: {$design->catatan_revisi}",
+            'judul' => 'Design Needs Revision',
+            'pesan' => "Design for {$design->umkm->nama_usaha} needs revision. Notes: {$design->catatan_revisi}",
             'tipe' => 'perlu_revisi',
             'notifiable_type' => UmkmDesign::class,
             'notifiable_id' => $design->id,
         ]);
 
-        self::notifyAdmin('Design Perlu Revisi', "Design {$design->umkm->nama_usaha} diminta revisi.", 'perlu_revisi', UmkmDesign::class, $design->id);
+        self::notifyAdmin('Design Needs Revision', "Design for {$design->umkm->nama_usaha} revision requested.", 'perlu_revisi', UmkmDesign::class, $design->id);
     }
 
     public static function notifyDesignRevised(UmkmDesign $design): void
     {
-        $pesan = "Tim Desain telah memperbaiki desain untuk {$design->umkm->nama_usaha}. Silakan cek kembali untuk di-review.";
+        $pesan = "Design for {$design->umkm->nama_usaha} has been revised. Please review again.";
 
         $clients = User::where('role', 'client')->get();
         foreach ($clients as $client) {
             Notifikasi::create([
                 'user_id' => $client->id,
-                'judul' => 'Desain Telah Direvisi 🎨',
+                'judul' => 'Design Revised 🎨',
                 'pesan' => $pesan,
                 'tipe' => 'revised',
                 'notifiable_type' => UmkmDesign::class,
@@ -132,33 +132,32 @@ class NotifikasiService
             ]);
         }
 
-        self::notifyAdmin('Desain Direvisi', $pesan, 'revised', UmkmDesign::class, $design->id);
+        self::notifyAdmin('Design Revised', $pesan, 'revised', UmkmDesign::class, $design->id);
     }
 
     public static function notifyDesignApproved(UmkmDesign $design): void
     {
-        // Notif ke designer aslinya
         Notifikasi::create([
             'user_id' => $design->designer_id,
-            'judul' => 'Design Anda Disetujui ✅',
-            'pesan' => "Design untuk {$design->umkm->nama_usaha} telah disetujui oleh client.",
+            'judul' => 'Design Approved ✅',
+            'pesan' => "Design for {$design->umkm->nama_usaha} has been approved by client.",
             'tipe' => 'design_approved',
             'notifiable_type' => UmkmDesign::class,
             'notifiable_id' => $design->id,
         ]);
 
-        self::notifyAdmin('Design Disetujui', "Design {$design->umkm->nama_usaha} disetujui client.", 'design_approved', UmkmDesign::class, $design->id);
+        self::notifyAdmin('Design Approved', "Design for {$design->umkm->nama_usaha} approved by client.", 'design_approved', UmkmDesign::class, $design->id);
     }
 
     public static function notifyTeamPasangDesignApproved(UmkmDesign $design): void
     {
-        $pesan = "Design untuk {$design->umkm->nama_usaha} ({$design->umkm->kota->nama}) telah disetujui. Siap untuk pemasangan stiker.";
+        $pesan = "UMKM {$design->umkm->nama_usaha} ({$design->umkm->kota->nama}) siap untuk pemasangan stiker.";
 
         $users = User::where('role', 'team_pasang')->get();
         foreach ($users as $user) {
             Notifikasi::create([
                 'user_id' => $user->id,
-                'judul' => 'UMKM Siap Pasang Stiker 🎯',
+                'judul' => 'UMKM Ready for Installation 🎯',
                 'pesan' => $pesan,
                 'tipe' => 'siap_pasang',
                 'notifiable_type' => Umkm::class,
@@ -166,6 +165,6 @@ class NotifikasiService
             ]);
         }
 
-        self::notifyAdmin('UMKM Siap Pasang', $pesan, 'siap_pasang', Umkm::class, $design->umkm->id);
+        self::notifyAdmin('UMKM Ready for Installation', "UMKM {$design->umkm->nama_usaha} ready for sticker installation.", 'siap_pasang', Umkm::class, $design->umkm->id);
     }
 }
