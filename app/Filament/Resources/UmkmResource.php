@@ -183,13 +183,23 @@ public static function canDelete($record): bool
 
                         Forms\Components\Select::make('kota_id')
     ->label('Kota')
-    ->options(Kota::pluck('nama', 'id'))
+    ->options(function () {
+        $user = auth()->user();
+        if ($user && $user->isPicLapangan() && $user->kota_id) {
+            return Kota::where('id', $user->kota_id)->pluck('nama', 'id');
+        }
+        return Kota::pluck('nama', 'id');
+    })
+    ->default(fn () => auth()->user()?->isPicLapangan() ? auth()->user()->kota_id : null)
+    ->disabled(fn () => auth()->user()?->isPicLapangan())
+    ->dehydrated()
     ->searchable()
     ->preload()
     ->required()
 
     ->createOptionAction(function ($action) {
-        return $action->label('Tambah Kota');
+        return $action->label('Tambah Kota')
+            ->visible(fn () => !auth()->user()?->isPicLapangan());
     })
 
     ->createOptionForm([
